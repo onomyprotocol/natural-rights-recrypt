@@ -1,4 +1,39 @@
-import * as JSON from 'buffer-json'
+import { bufferToHex, hexToBuffer } from './hex-buffer'
+import { TextEncoder, TextDecoder } from 'text-encoding-shim'
+
+const textEncoder = new TextEncoder()
+const textDecoder = new TextDecoder()
+
+function replacer(_key: string, value: any) {
+  if (value instanceof Uint8Array) {
+    return bufferToHex(value)
+  }
+  if (value instanceof Buffer) {
+    return bufferToHex(new Uint8Array(value))
+  }
+
+  if (value && value.type === 'Buffer') {
+    return bufferToHex(new Uint16Array(value.data))
+  }
+  return value
+}
+
+function reviver(_key: string, value: any) {
+  if (typeof value === 'string') {
+    return hexToBuffer(value)
+  }
+  return value
+}
+
+function stringify(value: string, space?: number) {
+  const res = JSON.stringify(value, replacer, space)
+  return res
+}
+
+function parse(text: string) {
+  const res = JSON.parse(text, reviver)
+  return res
+}
 
 const encoding = 'hex'
 
@@ -9,13 +44,17 @@ interface KeyPair {
 
 export default function recryptApiToNaturalRights(RecryptApi: any) {
   return {
+    serialize(obj: any) {
+      return stringify(obj)
+    },
+
     async cryptKeyGen() {
       const encryptionKeys = RecryptApi.generateKeyPair()
-      const pubX = encryptionKeys.publicKey.x.toString(encoding)
-      const pubY = encryptionKeys.publicKey.y.toString(encoding)
+      const pubX = bufferToHex(encryptionKeys.publicKey.x)
+      const pubY = bufferToHex(encryptionKeys.publicKey.y)
 
       return {
-        privKey: encryptionKeys.privateKey.toString(encoding) as string,
+        privKey: bufferToHex(encryptionKeys.privateKey),
         pubKey: `${pubX}.${pubY}`
       }
     },
@@ -23,16 +62,16 @@ export default function recryptApiToNaturalRights(RecryptApi: any) {
     async cryptTransformKeyGen(fromKeyPair: KeyPair, toPubKey: string, signKeyPair: KeyPair) {
       const [pubX, pubY] = toPubKey.split('.')
 
-      return JSON.stringify(
+      return stringify(
         RecryptApi.generateTransformKey(
-          Buffer.from(fromKeyPair.privKey, encoding),
+          hexToBuffer(fromKeyPair.privKey),
           {
-            x: Buffer.from(pubX, encoding),
-            y: Buffer.from(pubY, encoding)
+            x: hexToBuffer(pubX),
+            y: hexToBuffer(pubY)
           },
-          Buffer.from(signKeyPair.privKey, encoding)
+          hexToBuffer(signKeyPair.privKey)
         )
-      ) as string
+      )
     },
 
     async encrypt(pubKey: string, plaintext: string, signKeyPair: KeyPair) {
@@ -41,55 +80,52 @@ export default function recryptApiToNaturalRights(RecryptApi: any) {
 
       while (padded.length < 384) padded += ' '
 
-      return JSON.stringify(
-        RecryptApi.encrypt(
-          Buffer.from(padded, 'utf-8'), // TODO: Explicit encoding?
-          {
-            x: Buffer.from(pubX, encoding),
-            y: Buffer.from(pubY, encoding)
-          },
-          Buffer.from(signKeyPair.privKey, encoding)
-        )
-      ) as string
+      const res = RecryptApi.encrypt(
+        textEncoder.encode(padded),
+        {
+          x: hexToBuffer(pubX),
+          y: hexToBuffer(pubY)
+        },
+        Buffer.from(signKeyPair.privKey, encoding)
+      )
+
+      return stringify(res)
     },
 
     async signKeyGen() {
       const signingKeys = RecryptApi.generateEd25519KeyPair()
 
       return {
-        privKey: signingKeys.privateKey.toString(encoding) as string,
-        pubKey: signingKeys.publicKey.toString(encoding) as string
+        privKey: bufferToHex(signingKeys.privateKey),
+        pubKey: bufferToHex(signingKeys.publicKey)
       }
     },
 
     async cryptTransform(transformKey: string, ciphertext: string, signKeyPair: KeyPair) {
-      return JSON.stringify(
+      return stringify(
         RecryptApi.transform(
-          JSON.parse(ciphertext),
-          JSON.parse(transformKey),
-          Buffer.from(signKeyPair.privKey, encoding)
+          parse(ciphertext),
+          parse(transformKey),
+          hexToBuffer(signKeyPair.privKey)
         )
-      ) as string
+      )
     },
 
     async decrypt(keyPair: KeyPair, ciphertext: string) {
-      return RecryptApi.decrypt(JSON.parse(ciphertext), Buffer.from(keyPair.privKey, encoding))
-        .toString('utf-8')
-        .trim() as string
+      const result = RecryptApi.decrypt(parse(ciphertext), hexToBuffer(keyPair.privKey))
+
+      return textDecoder.decode(result instanceof Buffer ? new Uint8Array(result) : result).trim()
     },
 
     async sign(keyPair: KeyPair, text: string) {
-      return RecryptApi.ed25519Sign(
-        Buffer.from(keyPair.privKey, encoding),
-        Buffer.from(text)
-      ).toString(encoding) as string
+      return bufferToHex(RecryptApi.ed25519Sign(hexToBuffer(keyPair.privKey), Buffer.from(text)))
     },
 
     async verify(pubKey: string, signature: string, text: string) {
       return RecryptApi.ed25519Verify(
-        Buffer.from(pubKey, encoding),
+        hexToBuffer(pubKey),
         Buffer.from(text),
-        Buffer.from(signature, encoding)
+        hexToBuffer(signature)
       ) as boolean
     }
   }

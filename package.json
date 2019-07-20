@@ -6,7 +6,9 @@
   "main": "dist/natural-rights-recrypt.umd.js",
   "module": "dist/natural-rights-recrypt.es5.js",
   "typings": "dist/types/natural-rights-recrypt.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "author": "go1dfish <me@go1dfish.me>",
   "repository": {
     "type": "git",
@@ -32,7 +34,10 @@
     "travis-deploy-once": "travis-deploy-once"
   },
   "lint-staged": {
-    "{src,test}/**/*.ts": ["prettier --write", "git add"]
+    "{src,test}/**/*.ts": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "config": {
     "commitizen": {
@@ -45,8 +50,15 @@
     },
     "testEnvironment": "node",
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
-    "moduleFileExtensions": ["ts", "tsx", "js"],
-    "coveragePathIgnorePatterns": ["/node_modules/", "/test/"],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/"
+    ],
     "coverageThreshold": {
       "global": {
         "branches": 90,
@@ -55,14 +67,18 @@
         "statements": 95
       }
     },
-    "collectCoverageFrom": ["src/*.{js,ts}"]
+    "collectCoverageFrom": [
+      "src/*.{js,ts}"
+    ]
   },
   "prettier": {
     "semi": false,
     "singleQuote": true
   },
   "commitlint": {
-    "extends": ["@commitlint/config-conventional"]
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   },
   "devDependencies": {
     "@commitlint/cli": "^8.0.0",
@@ -102,6 +118,6 @@
   },
   "dependencies": {
     "@ironcorelabs/recrypt-node-binding": "^0.4.2",
-    "buffer-json": "^2.0.0"
+    "text-encoding-shim": "^1.0.3"
   }
 }
