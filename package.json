@@ -1,6 +1,6 @@
 {
   "name": "natural-rights-recrypt",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Recrypt primitives interface for natural-rights",
   "keywords": [],
   "main": "dist/natural-rights-recrypt.umd.js",
@@ -20,6 +20,7 @@
   "scripts": {
     "lint": "tslint  --project tsconfig.json -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
     "prebuild": "rimraf dist",
+    "prepare": "npm run prebuild && npm run build",
     "build": "tsc --module commonjs && rollup -c rollup.config.ts && typedoc --out docs --target es6 --theme minimal --mode file src",
     "start": "rollup -c rollup.config.ts -w",
     "test": "jest --coverage",
