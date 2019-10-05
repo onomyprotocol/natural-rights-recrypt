@@ -27,11 +27,11 @@ function reviver(_key: string, value: any) {
 }
 
 function stringify(value: string) {
-  return base64.atob(JSON.stringify(value, replacer))
+  return base64.btoa(JSON.stringify(value, replacer))
 }
 
 function parse(text: string) {
-  const res = JSON.parse(base64.btoa(text), reviver)
+  const res = JSON.parse(base64.atob(text), reviver)
   return res
 }
 
