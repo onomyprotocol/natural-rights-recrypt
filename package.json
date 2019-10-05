@@ -1,6 +1,6 @@
 {
   "name": "natural-rights-recrypt",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Recrypt primitives interface for natural-rights",
   "keywords": [],
   "main": "dist/natural-rights-recrypt.umd.js",

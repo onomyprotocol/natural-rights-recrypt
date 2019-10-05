@@ -26,13 +26,12 @@ function reviver(_key: string, value: any) {
   return value
 }
 
-function stringify(value: string) {
+function stringify(value: any) {
   return base64.btoa(JSON.stringify(value, replacer))
 }
 
 function parse(text: string) {
-  const res = JSON.parse(base64.atob(text), reviver)
-  return res
+  return JSON.parse(base64.atob(text), reviver)
 }
 
 const encoding = 'hex'

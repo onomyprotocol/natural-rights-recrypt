@@ -6,7 +6,7 @@ if (typeof btoa === 'undefined') {
     return Buffer.from(b, 'binary').toString('base64')
   }
 } else {
-  base64.btoa = btoa
+  base64.btoa = (x: string) => btoa(x)
 }
 
 // tslint:disable-next-line strict-type-predicates
@@ -15,5 +15,5 @@ if (typeof atob === 'undefined') {
     return Buffer.from(b, 'base64').toString('binary')
   }
 } else {
-  base64.atob = atob
+  base64.atob = (x: string) => atob(x)
 }
