@@ -1,5 +1,6 @@
 import { bufferToHex, hexToBuffer } from './hex-buffer'
 import { TextEncoder, TextDecoder } from 'text-encoding-shim'
+import { base64 } from './base64'
 
 const textEncoder = new TextEncoder()
 const textDecoder = new TextDecoder()
@@ -25,13 +26,12 @@ function reviver(_key: string, value: any) {
   return value
 }
 
-function stringify(value: string, space?: number) {
-  const res = JSON.stringify(value, replacer, space)
-  return res
+function stringify(value: string) {
+  return base64.atob(JSON.stringify(value, replacer))
 }
 
 function parse(text: string) {
-  const res = JSON.parse(text, reviver)
+  const res = JSON.parse(base64.btoa(text), reviver)
   return res
 }
 
