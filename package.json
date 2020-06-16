@@ -115,7 +115,7 @@
     "typescript": "^3.5.1"
   },
   "dependencies": {
-    "@ironcorelabs/recrypt-node-binding": "^0.4.2",
+    "@ironcorelabs/recrypt-node-binding": "^0.7.1",
     "text-encoding-shim": "^1.0.3"
   }
 }
